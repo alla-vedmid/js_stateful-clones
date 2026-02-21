@@ -7,38 +7,28 @@
  * @return {Object[]}
  */
 function transformStateWithClones(state, actions) {
-  const updState = [];
   let currentState = state;
+  const stateHistory = [];
 
-  for (const item of actions) {
-    const action = item.type;
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
 
-    switch (action) {
-      case 'addProperties':
-        currentState = { ...currentState, ...item.extraData };
-        updState.push(currentState);
-        break;
+    if (action.type === 'clear') {
+      currentState = {};
+    } else if (action.type === 'addProperties') {
+      currentState = { ...currentState, ...action.extraData };
+    } else if (action.type === 'removeProperties') {
+      currentState = { ...currentState };
 
-      case 'removeProperties':
-        currentState = { ...currentState };
-
-        for (const key of item.keysToRemove) {
-          delete currentState[key];
-        }
-
-        updState.push(currentState);
-        break;
-
-      case 'clear':
-        currentState = {};
-        updState.push(currentState);
-        break;
+      for (let j = 0; j < action.keysToRemove.length; j++) {
+        delete currentState[action.keysToRemove[j]];
+      }
     }
+
+    stateHistory.push(currentState);
   }
 
-  return updState;
+  return stateHistory;
 }
-
-
 
 module.exports = transformStateWithClones;
